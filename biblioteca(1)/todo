@@ -1,5 +1,11 @@
-- retornar o nome do livro e do cliente no get - Feito
 - verificar a qtd de livros disponiveis antes de emprestar - Falta
 - Retirar no maximo 3 livros por usuario
 	- Adicionar uma função na persistencia para verificar pelo id
 	- Foi mais ou menos
+- Verificar se o livro existe
+- Verificar se o cara
+- Quantidade de livros alugados
+- Quantidade des livros por cabeça
+- Se o livro ta disponivel
+- Adicionar a coluna no emprestimo para data de devolução de fato
+- 
