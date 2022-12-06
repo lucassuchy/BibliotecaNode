@@ -1,0 +1,5 @@
+- retornar o nome do livro e do cliente no get - Feito
+- verificar a qtd de livros disponiveis antes de emprestar - Falta
+- Retirar no maximo 3 livros por usuario
+	- Adicionar uma função na persistencia para verificar pelo id
+	- Foi mais ou menos
