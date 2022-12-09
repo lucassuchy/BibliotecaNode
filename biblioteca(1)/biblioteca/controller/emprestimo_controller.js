@@ -1,44 +1,31 @@
 const emprestimoNegocio = require('../negocio/emprestimo_negocio');                 // Importa funcionalides de NEGOCIO
 
-exports.inserir = (req, res) => {
-	
+exports.inserir = async (req, res) => {
+	try {
 	const emprestimo = req.body;
-	emprestimoNegocio.inserir(emprestimo, function (err, emprestimoRealizado) {
-		if(err){
-			res.status(err.numero).json({erro: err.mensagem});
-		}
-		else{
-			res.status(201).json(emprestimoRealizado);
-		}
-	});
+	console.log(req.body);
+	const inseriEmprestimo = await emprestimoNegocio.inserir(emprestimo) 
+	res.json(inseriEmprestimo)
+	} catch (err){
+		res.status(err.numero).json({erro: err.mensagem});
+	}
 }
 
-exports.listar = (req, res) => {                                          // Funcionalidade LISTAR (exportada diretamente)
-  
-	emprestimoNegocio.listar(function (err, emprestimos) {                     
-	  if(err) {
-		res.status(err.numero).json({erro: err.mensagem});
-	  }
-	  else {
-		res.json(emprestimos);
-	  }
-	});
-  
+exports.listar = async (req, res) => {                                          // Funcionalidade LISTAR (exportada diretamente)
+	const listaEmprestimos = await emprestimoNegocio.listar();
+	res.json(listaEmprestimos);
   }
 
 //Adicionar busca por id de user 
 // Adicionar busca por id de livro
-exports.buscarPorId = (req, res ) => {
-
+exports.buscarPorId = async (req, res ) => {
 	const id = req.params.id;
-	emprestimoNegocio.buscarPorId(id, function (err, emprestimo){
-		if(err){
-			res.status(err.numero).json({erro: err.mensagem});
-		}
-		else {
-			res.json(emprestimo);
-		}
-	});
+	try {
+		const resultadoBusca = await emprestimoNegocio.buscarPorId(id);
+		res.json(resultadoBusca);
+	}catch (err){
+		res.status(err.numero).json({erro: err.mensagem});
+	}
 }
 
 exports.atualizar = (req, res) => {

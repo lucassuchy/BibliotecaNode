@@ -2,81 +2,78 @@ const emprestimoPersistencia = require('../persistencia/emprestimo_persistencia.
 const livroPersistencia = require('../persistencia/livro_persistencia.js')   // Importa funcionalides de PERSISTÊNCIA
 
 
-function inserir (emprestimo, callback) {                      // Funcionalidade INSERIR (exportada indiretamente)
-    let existe = livroPersistencia.verificaLivroExiste(emprestimo.livro,callback);
-    console.log(existe);
-    // console.log('aa');
-    let qtdEmprestimos = emprestimoPersistencia.verificaQtdEmprestimosCliente(emprestimo.usuario, callback);
-    console.log(qtdEmprestimos);
-    // if(!emprestimo || !emprestimo.livro || !emprestimo.usuario){
-    //         const erro = { 
-    //             mensagem: "Campo livro ou usuario vazio(s)!",
-    //             numero: 400
-    //         };
-    //         callback(erro, undefined)
-    // }
-    // else {
-    //     // Verifica se o livro do brother existe
-    //     if(existe){
-    //         console.log('chegou aqui')
-    //         if ((qtdEmprestimos) <= 3){
-    //             emprestimoPersistencia.inserir(emprestimo, callback);
-    //         }
-    //         else{
-    //             const erro = { 
-    //                 mensagem: "Usuario com o limite de livros atingido",
-    //                 numero: 501
-    //             };
-    //             callback(erro, undefined)
+async function inserir (emprestimo) {                      // Funcionalidade INSERIR (exportada indiretamente)
+    console.log(emprestimo);
+    if(emprestimo && emprestimo.livro && emprestimo.usuario){
+        const emprestimoInserido = await emprestimoPersistencia.inserir(emprestimo);
+        return emprestimoInserido
+    }
+    else {
+        const erro = { 
+            mensagem: "Campo livro ou usuario vazio(s)!",
+            numero: 400
+        };
+        throw erro;
+    }
+}  
 
-    //         }
-    //     }else {
-    //         const erro = { 
-    //             mensagem: "Livro Não existe",
-    //             numero: 501
-    //         };
-    //         callback(erro, undefined)
-    //     }
 
-    // }  
+async function listar () {                                // Funcionalidade LISTAR (exportada indiretamente)
+    return await emprestimoPersistencia.listar();
 }
 
-
-function listar (callback) {                                // Funcionalidade LISTAR (exportada indiretamente)
-    emprestimoPersistencia.listar(callback);
-}
-
-function buscarPorId(id, callback){                         // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
+async function buscarPorId(id){                         // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
     if(!id || isNaN(id)){
         const erro = { 
             mensagem: "Identificador Invalido!",
             numero: 400
         }
-        callback(erro, undefined);
+        throw erro;
     }
     else { 
-        emprestimoPersistencia.buscarPorId(id, callback);
+        const testaId = await emprestimoPersistencia.validaId(id);
+        if (testaId){
+            // Evita de mandar pro banco uma requisão inutil
+            const retorno = await emprestimoPersistencia.buscarPorId(id);
+            return retorno;
+        }else{
+            const erro = { 
+                mensagem: "Identificador Não encontrado!",
+                numero: 400
+            }
+            throw erro;
+        }
     }
 }
 
 
-function atualizar(id, emprestimo, callback) {                 // Funcionalidade ATUALIZAR (exportada indiretamente)
+async function atualizar(id, emprestimo) {                 // Funcionalidade ATUALIZAR (exportada indiretamente)
     if(!id || isNaN(id)){
         const erro = { 
             mensagem: "Identificador Invalido!",
             numero: 400
         }
-        callback(erro, undefined);
+        throw erro;
     }
     else if(!emprestimo || !emprestimo.livro || !emprestimo.usuario || !emprestimo.data_emprestimo || !emprestimo.data_devolucao) {
         const erro = { 
             mensagem: "Os campos livro, usuario, data emprestimo ou data devolução devem ser preenchido(s)",
             numero: 400
         };
-        callback(erro, undefined)
+        throw erro;
     }
     else { 
-        emprestimoPersistencia.atualizar(id, emprestimo, callback);
+        const testaId = await emprestimoPersistencia.validaId(id);
+        if (testaId){ 
+        const atualizaemprestimo = await emprestimoPersistencia.atualizar(id, emprestimo);
+        return atualizaemprestimo;
+        } else{
+            const erro = { 
+                mensagem: "Identificador Não encontrado!",
+                numero: 400
+            }
+            throw erro;
+        }
     }
 
 }
