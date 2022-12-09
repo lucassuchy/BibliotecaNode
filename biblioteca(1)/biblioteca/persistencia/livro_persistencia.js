@@ -163,7 +163,33 @@ function qtdLivros(id, callback) {                                              
     })
 }
 
+function verificaLivroExiste(id, callback){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
+    const cliente = new Client(conexao);
+    cliente.connect();
+    
+    const sql = "SELECT id FROM biblioteca.emprestimos WHERE id=$1 ;";
+    const values = [id];
+
+    cliente.query(sql, values,
+        function (err, res) {
+            if(err) {
+                console.log(err);
+                callback(erroBD, undefined);                
+            }
+            else if (res.rows && res.rows.length > 0) {
+                let retorno =  res.rows[0];
+                callback(undefined, retorno);
+            }
+            else {
+                callback(erroLivroNaoEncontrado, undefined);
+            }
+            cliente.end();
+        }
+    )    
+}
+
+
 
 module.exports = {
-    inserir, listar, buscarPorId, atualizar, deletar, qtdLivros                     // Exporta funcionalidades para NEGOCIO
+    inserir, listar, buscarPorId, atualizar, deletar, qtdLivros,verificaLivroExiste                     // Exporta funcionalidades para NEGOCIO
 }

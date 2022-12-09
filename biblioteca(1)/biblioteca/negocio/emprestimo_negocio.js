@@ -1,17 +1,44 @@
 const emprestimoPersistencia = require('../persistencia/emprestimo_persistencia.js')   // Importa funcionalides de PERSISTÊNCIA
+const livroPersistencia = require('../persistencia/livro_persistencia.js')   // Importa funcionalides de PERSISTÊNCIA
 
 
 function inserir (emprestimo, callback) {                      // Funcionalidade INSERIR (exportada indiretamente)
-    if(!emprestimo || !emprestimo.livro || !emprestimo.usuario  ){
-            const erro = { 
-                mensagem: "Campo livro ou usuario vazio(s)!",
-                numero: 400
-            };
-            callback(erro, undefined)
-    }
-    else {
-            emprestimoPersistencia.inserir(emprestimo, callback);
-    }  
+    let existe = livroPersistencia.verificaLivroExiste(emprestimo.livro,callback);
+    console.log(existe);
+    // console.log('aa');
+    let qtdEmprestimos = emprestimoPersistencia.verificaQtdEmprestimosCliente(emprestimo.usuario, callback);
+    console.log(qtdEmprestimos);
+    // if(!emprestimo || !emprestimo.livro || !emprestimo.usuario){
+    //         const erro = { 
+    //             mensagem: "Campo livro ou usuario vazio(s)!",
+    //             numero: 400
+    //         };
+    //         callback(erro, undefined)
+    // }
+    // else {
+    //     // Verifica se o livro do brother existe
+    //     if(existe){
+    //         console.log('chegou aqui')
+    //         if ((qtdEmprestimos) <= 3){
+    //             emprestimoPersistencia.inserir(emprestimo, callback);
+    //         }
+    //         else{
+    //             const erro = { 
+    //                 mensagem: "Usuario com o limite de livros atingido",
+    //                 numero: 501
+    //             };
+    //             callback(erro, undefined)
+
+    //         }
+    //     }else {
+    //         const erro = { 
+    //             mensagem: "Livro Não existe",
+    //             numero: 501
+    //         };
+    //         callback(erro, undefined)
+    //     }
+
+    // }  
 }
 
 
@@ -82,5 +109,5 @@ function verificaLivroDisponivel(id, callback) {                            // F
 }
 
 module.exports = {
-    inserir, listar,buscarPorId, atualizar, deletar      // Exporta funcionalidades para CONTROLLER
+    inserir, listar,buscarPorId, atualizar, deletar,verificaLivroDisponivel      // Exporta funcionalidades para CONTROLLER
 }

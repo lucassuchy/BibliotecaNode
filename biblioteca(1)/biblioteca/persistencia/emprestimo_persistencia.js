@@ -164,11 +164,11 @@ function qtdLivros(id, callback) {                                              
 }
 
 
-function verificaLivroExiste(id, callback){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
+function verificaLivroAlugados(id, callback){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
     const cliente = new Client(conexao);
     cliente.connect();
     
-    const sql = "SELECT id FROM biblioteca.emprestimos WHERE id=$1";
+    const sql = "select count(id_livro) from crud_produtos.biblioteca.emprestimos where id_livro = $1 and data_retorno is null group by id_livro;";
     const values = [id];
 
     cliente.query(sql, values,
@@ -190,11 +190,11 @@ function verificaLivroExiste(id, callback){                                     
     )    
 }
 
-function verificaLivroDisponivel(id, callback){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
+function verificaQtdEmprestimosCliente(id, callback){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
     const cliente = new Client(conexao);
     cliente.connect();
     
-    const sql = "select count(id_livro) from crud_produtos.biblioteca.emprestimos where id_livro = $1 group by id_livro";
+    const sql = "select count(id_cliente) from crud_produtos.biblioteca.emprestimos where id_cliente = $1 and data_retorno is null group by id_cliente;";
     const values = [id];
 
     cliente.query(sql, values,
@@ -215,8 +215,9 @@ function verificaLivroDisponivel(id, callback){                                 
         }
     )    
 }
+
 
 
 module.exports = {
-    inserir, listar,buscarPorId,atualizar, deletar,qtdLivros ,verificaLivroDisponivel                   // Exporta funcionalidades para NEGOCIO
+    inserir, listar,buscarPorId,atualizar, deletar,qtdLivros ,verificaLivroAlugados,verificaQtdEmprestimosCliente                   // Exporta funcionalidades para NEGOCIO
 }

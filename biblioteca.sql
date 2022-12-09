@@ -29,3 +29,5 @@ CREATE TABLE biblioteca.emprestimos (
 
 ALTER TABLE biblioteca.emprestimos ADD CONSTRAINT id_cliente FOREIGN KEY (id_cliente) REFERENCES biblioteca.usuarios(id);
 ALTER TABLE biblioteca.emprestimos ADD CONSTRAINT id_livro FOREIGN KEY (id_livro) REFERENCES biblioteca.livros(id);
+
+alter table crud_produtos.biblioteca.emprestimos  add column data_retorno timestamp;
