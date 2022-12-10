@@ -3,7 +3,6 @@ const emprestimoNegocio = require('../negocio/emprestimo_negocio');             
 exports.inserir = async (req, res) => {
 	try {
 	const emprestimo = req.body;
-	console.log(req.body);
 	const inseriEmprestimo = await emprestimoNegocio.inserir(emprestimo) 
 	res.json(inseriEmprestimo)
 	} catch (err){
@@ -16,8 +15,6 @@ exports.listar = async (req, res) => {                                          
 	res.json(listaEmprestimos);
   }
 
-//Adicionar busca por id de user 
-// Adicionar busca por id de livro
 exports.buscarPorId = async (req, res ) => {
 	const id = req.params.id;
 	try {
@@ -28,26 +25,25 @@ exports.buscarPorId = async (req, res ) => {
 	}
 }
 
-exports.atualizar = (req, res) => {
+exports.atualizar = async (req, res) => {
 	const id = req.params.id;
 	const emprestimo = req.body;
-	emprestimoNegocio.atualizar(id, emprestimo, function (err, emprestimoAlterado) {
-		if(err){
-			res.status(err.numero).json({erro: err.mensagem});
-		}
-		else {
-			res.json(emprestimoAlterado);
-		}
-	});
+	try{
+		const atualiza = await emprestimoNegocio.atualizar(id, emprestimo);
+		res.json(atualiza);
+	}catch(err){
+		res.status(err.numero).json({erro: err.mensagem});
+	}
 }
 
-exports.deletar = (req, res) => {
+exports.deletar = async (req, res) => {
 
 	const id = req.params.id;
-	emprestimoNegocio.deletar(id, function (err,emprestimo) {
-		if(err){
-			res.status(err.numero).json({erro: err.mensagem})
-		}
-		else{res.json(emprestimo)}
-	})
+	try{ 
+		const deletaEmprestimo = await emprestimoNegocio.deletar(id);
+		res.json(deletaEmprestimo);
+	}catch(err){
+		console.log(err);
+		res.status(err.numero).json({erro: err.mensagem});
+	}
 }

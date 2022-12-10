@@ -19,177 +19,117 @@ const conexao = {
 };
 
 
-function inserir(livro, callback) {                                                   // Funcionalidade INSERIR (exportada indiretamente)
+async function inserir(livro) {                                                   // Funcionalidade INSERIR (exportada indiretamente)
     const cliente = new Client(conexao);
-    cliente.connect();
-
+    await cliente.connect();
     const sql = "INSERT INTO biblioteca.livros(nome, autor, ano, quantidade) VALUES ($1, $2, $3, $4) RETURNING *";
     const values = [livro.nome, livro.autor, livro.ano, livro.quantidade];
-
-    cliente.query(sql, values, 
-        function (err, res){
-            if(err){
-                console.log(err);
-                callback(erroBD, undefined);
-            }
-            else {
-                callback(undefined, res.rows[0]);
-            }
-            cliente.end();
-        })
+    const res = await cliente.query(sql, values)
+    await cliente.end();
+    return res.rows[0];
 
 }
 
 
-function listar(callback) {                                                             // Funcionalidade LISTAR (exportada indiretamente)
+async function listar() {                                                             // Funcionalidade LISTAR (exportada indiretamente)
     const cliente = new Client(conexao);
-    cliente.connect();
+    await cliente.connect();
     
-    const sql = "SELECT * FROM biblioteca.livros ORDER BY id";
-    cliente.query(sql, 
-        function (err, res) {
-            if(err) {
-                console.log(err);
-                callback(erroBD, undefined);
-            }
-            else {
-                let livros = res.rows;
-                callback(undefined, livros);     
-            }
-            cliente.end();
-        }
-    )    
+    const sql = `SELECT * FROM biblioteca.livros ORDER BY id`;
+    const rest = await cliente.query(sql);
+    let retornoQuery = rest.rows.map(function(linha) {
+        return {
+                id: linha.id,                
+                nome: linha.nome,
+                autor:   linha.autor,
+                ano: linha.ano,
+                quantidade: linha.quantidade
+                }
+        
+    })
+    await cliente.end();
+    return retornoQuery
 }
 
 
-function buscarPorId(id, callback){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
+async function buscarPorId(id){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
     const cliente = new Client(conexao);
-    cliente.connect();
-    
+    await cliente.connect();
     const sql = "SELECT * FROM biblioteca.livros WHERE id=$1";
     const values = [id];
-
-    cliente.query(sql, values,
-        function (err, res) {
-            if(err) {
-                console.log(err);
-                callback(erroBD, undefined);                
-            }
-            else if (res.rows && res.rows.length > 0) {
-                let livro = res.rows[0];
-                callback(undefined, livro);
-            }
-            else {
-                callback(erroLivroNaoEncontrado, undefined);
-            }
-
-            cliente.end();
-        }
-    )    
+    const query = await cliente.query(sql, values);
+    await cliente.end();
+    return query.rows[0];  
 }
 
 
-function atualizar(id, livro, callback) {                                              // Funcionalidade ATUALIZAR (exportada indiretamente)
+async function atualizar(id, livro) {                                              // Funcionalidade ATUALIZAR (exportada indiretamente)
     const cliente = new Client(conexao);
-    cliente.connect();
-
-    const sql = "UPDATE biblioteca.livros SET nome=$1, autor=$2, ano=$3, quantidade=$4 WHERE id=$5 RETURNING *"    
-    const values = [livro.nome, livro.autor, livro.ano, livro.quantidade, id];
-
-    cliente.query(sql, values, function(err, res) {
-        if(err) {
-            console.log(err);
-            callback(erroBD, undefined);                
-        }
-        else if (res.rows && res.rows.length > 0) {
-            let livro = res.rows[0];
-            callback(undefined, livro);
-        }
-        else {
-            callback(erroLivroNaoEncontrado, undefined);
-        }
-
-        cliente.end();        
-    })
+    await cliente.connect();
+    const sql = `UPDATE biblioteca.livros 
+                  SET nome=$1
+                , autor=$2
+                , ano=$3
+                , quantidade=$4 
+                WHERE id=$5 RETURNING *`
+    const values = [livro.nome
+                    , livro.autor
+                    , livro.ano
+                    , livro.quantidade
+                    , id];
+    const query = await cliente.query(sql, values)
+    await cliente.end()
+    let retorno = query.rows[0];
+    return retorno;
 }
 
 
-function deletar(id, callback) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
+async function deletar(id) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
     const cliente = new Client(conexao);
-    cliente.connect();
-
-    const sql = "DELETE FROM biblioteca.livros WHERE id=$1 RETURNING *"
+    await cliente.connect();
+    const sql = "DELETE FROM biblioteca.livros WHERE id=$1 RETURNING *";
     const values = [id];
-
-    cliente.query(sql, values, function(err, res) {
-        if(err) {
-            console.log(err);
-            callback(erroBD, undefined);                
-    }
-        else if (res.rows && res.rows.length > 0) {
-            let livro = res.rows[0];
-            callback(undefined, livro);
-        }
-        else {
-            callback(erroLivroNaoEncontrado, undefined);
+    const query = await cliente.query(sql, values);
+    await cliente.end();
+    let retorno = query.rows[0];
+    return retorno;
     }
 
-        cliente.end();        
-    })
-}
-
-
-function qtdLivros(id, callback) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
+async function qtdLivrosAlugados(id) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
     const cliente = new Client(conexao);
-    cliente.connect();
-
-    const sql = "select quantidade from crud_produtos.biblioteca.livros where id = $1"
+    await cliente.connect();
+    const sql = `select coalesce((SELECT count(*) 
+                FROM biblioteca.emprestimos
+                where id_livro = $1
+                and data_retorno is null 
+                group by id_livro;,0) as count;`;
     const values = [id];
-
-    cliente.query(sql, values, function(err, res) {
-        if(err) {
-            console.log(err);
-            callback(erroBD, undefined);                
-    }
-        else if (res.rows && res.rows.length > 0) {
-            let livro = res.rows[0];
-            callback(undefined, livro);
-        }
-        else {
-            callback(erroLivroNaoEncontrado, undefined);
+    const query = await cliente.query(sql, values);
+    await cliente.end();
+    console.log(query.rows)
+    let retorno = query.rows[0];
+    return retorno;
     }
 
-        cliente.end();        
-    })
-}
-
-function verificaLivroExiste(id, callback){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
-    const cliente = new Client(conexao);
-    cliente.connect();
-    
-    const sql = "SELECT id FROM biblioteca.emprestimos WHERE id=$1 ;";
-    const values = [id];
-
-    cliente.query(sql, values,
-        function (err, res) {
-            if(err) {
-                console.log(err);
-                callback(erroBD, undefined);                
-            }
-            else if (res.rows && res.rows.length > 0) {
-                let retorno =  res.rows[0];
-                callback(undefined, retorno);
-            }
-            else {
-                callback(erroLivroNaoEncontrado, undefined);
-            }
-            cliente.end();
+async function verificaLivroDisponivel(id) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
+        const cliente = new Client(conexao);
+        await cliente.connect();
+        const sql = `SELECT quantidade  
+                    FROM biblioteca.livros 
+                    where id = $1;`;
+        const values = [id];
+        const query = await cliente.query(sql, values);
+        await cliente.end();
+        let retorno = query.rows[0];
+        return retorno;
         }
-    )    
-}
-
-
 
 module.exports = {
-    inserir, listar, buscarPorId, atualizar, deletar, qtdLivros,verificaLivroExiste                     // Exporta funcionalidades para NEGOCIO
+    inserir
+    , listar
+    , buscarPorId
+    , atualizar
+    , deletar
+    ,verificaLivroDisponivel
+    ,qtdLivrosAlugados                    // Exporta funcionalidades para NEGOCIO
 }

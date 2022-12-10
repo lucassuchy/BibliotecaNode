@@ -1,76 +1,56 @@
 const usuarioNegocio = require('../negocio/usuario_negocio');                 // Importa funcionalides de NEGOCIO
 
 
-exports.inserir = (req, res) => {                                         // Funcionalidade INSERIR (exportada diretamente)
-  
+exports.inserir = async (req, res) => {                                         // Funcionalidade INSERIR (exportada diretamente)
+  try {
   const usuario = req.body;
-  usuarioNegocio.inserir(usuario, function(err, usuarioInserido) {  
-    if(err){
-      res.status(err.numero).json({erro: err.mensagem});
-    }
-    else {
-      res.status(201).json(usuarioInserido);
-    }
-  }); 
-
+  usuarioNegocio.inserir(usuario);
+  res.status(201).json(usuarioInserido);
+  }catch(err){
+    res.status(err.numero).json({erro: err.mensagem});
+  }
 }
 
 
-exports.listar = (req, res) => {                                          // Funcionalidade LISTAR (exportada diretamente)
+exports.listar = async (req, res) => {                                          // Funcionalidade LISTAR (exportada diretamente)
   
-  usuarioNegocio.listar(function (err, usuarios) {                     
-    if(err) {
-      res.status(err.numero).json({erro: err.mensagem});
-    }
-    else {
-      res.json(usuarios);
-    }
-  });
-
+  const listaUsers = await usuarioNegocio.listar();
+  res.json(listaUsers);
 }
 
 
-exports.buscarPorId = (req, res) => {                                     // Funcionalidade BUSCAR_POR_ID (exportada diretamente)
-    
+exports.buscarPorId = async (req, res) => {                                     // Funcionalidade BUSCAR_POR_ID (exportada diretamente)
   const id = req.params.id;
-    usuarioNegocio.buscarPorId(id, function (err, usuario){                
-      if(err) {
-        res.status(err.numero).json({erro: err.mensagem});
-      }
-      else {
-        res.json(usuario);
-      }
-    });
-
+  try {
+    const usuario = await usuarioNegocio.buscarPorId(id);
+    res.json(usuario);
+  }catch(err){
+    res.status(err.numero).json({erro: err.mensagem});
+  }
 }
 
 
-exports.atualizar = (req, res) => {                                       // Funcionalidade ATUALIZAR (exportada diretamente)
+exports.atualizar = async (req, res) => {                                       // Funcionalidade ATUALIZAR (exportada diretamente)
     
   const id = req.params.id;
   const usuario = req.body;
-  usuarioNegocio.atualizar(id, usuario, function(err, usuarioAlterado) {
-    if(err){
-      res.status(err.numero).json({erro: err.mensagem});
-    }
-    else {
-      res.json(usuarioAlterado);
-    }
-  });
+  try{
+    usuarioNegocio.atualizar(id, usuario)
+    res.json(usuarioAlterado);
 
+  }catch(err){
+    res.status(err.numero).json({erro: err.mensagem});
+  }
 }
 
 
-exports.deletar = (req, res) => {                                         // Funcionalidade DELETAR (exportada diretamente)
+exports.deletar = async (req, res) => {                                         // Funcionalidade DELETAR (exportada diretamente)
   
   const id = req.params.id;
-  usuarioNegocio.deletar(id, function (err, usuario) {                   
-    if(err) {
-      res.status(err.numero).json({erro: err.mensagem});
-    }
-    else {
-      res.json(usuario);
-    }
-  });
+  try{
+    const usuarioDeletado = await   usuarioNegocio.deletar(id)
 
+  }catch(err){
+    res.status(err.numero).json({erro: err.mensagem});
+  }
 }

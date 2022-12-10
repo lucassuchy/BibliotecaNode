@@ -1,12 +1,40 @@
 const emprestimoPersistencia = require('../persistencia/emprestimo_persistencia.js')   // Importa funcionalides de PERSISTÊNCIA
 const livroPersistencia = require('../persistencia/livro_persistencia.js')   // Importa funcionalides de PERSISTÊNCIA
+const usuariosPersistencia = require('../persistencia/usuario_persistencia.js')   // Importa funcionalides de PERSISTÊNCIA
 
 
 async function inserir (emprestimo) {                      // Funcionalidade INSERIR (exportada indiretamente)
-    console.log(emprestimo);
     if(emprestimo && emprestimo.livro && emprestimo.usuario){
-        const emprestimoInserido = await emprestimoPersistencia.inserir(emprestimo);
-        return emprestimoInserido
+        const contaLivrosAlugados   = await livroPersistencia.verificaLivroDisponivel(emprestimo.livro);
+        const qtdLivrosAlugados     = await livroPersistencia.qtdLivrosAlugados(emprestimo.livro);
+        const qtdLivrosUsuario      = await usuariosPersistencia.qtdLivrosAlugados(emprestimo.usuario);
+        console.log(contaLivrosAlugados);
+        console.log(qtdLivrosAlugados);
+        console.log(qtdLivrosUsuario);
+
+        if (qtdLivrosAlugados.quantidade >= contaLivrosAlugados.count ){
+            console.log('PAssou na primeira regra');
+            // Compara a quantidade de livros alugados, com a qtd total de livros
+            if (+qtdLivrosUsuario.count  <= 3 ){
+                console.log('Passou na segunda regra');
+                // Verifica a quantidade de livros alugados pelo usuario
+                const emprestimoInserido = await emprestimoPersistencia.inserir(emprestimo);
+                return emprestimoInserido
+            }else{
+                const erro = { 
+                    mensagem: "Usuario com o limite de livros atingido!",
+                    numero: 400
+                };
+                throw erro;
+            }
+        }else{
+            const erro = { 
+                mensagem: "Sem exemplares disponiveis!",
+                numero: 400
+            };
+            throw erro;
+        }
+
     }
     else {
         const erro = { 
@@ -32,8 +60,10 @@ async function buscarPorId(id){                         // Funcionalidade BUSCAR
     }
     else { 
         const testaId = await emprestimoPersistencia.validaId(id);
-        if (testaId){
+        if (!testaId){
             // Evita de mandar pro banco uma requisão inutil
+            // TestaId, caso o retorno da query não é vazio, o elemento existe
+            // Se o elemento não existe, retorna falso.
             const retorno = await emprestimoPersistencia.buscarPorId(id);
             return retorno;
         }else{
@@ -69,7 +99,7 @@ async function atualizar(id, emprestimo) {                 // Funcionalidade ATU
         return atualizaemprestimo;
         } else{
             const erro = { 
-                mensagem: "Identificador Não encontrado!",
+                mensagem: "Emprestimo Não encontrado!",
                 numero: 400
             }
             throw erro;
@@ -78,33 +108,34 @@ async function atualizar(id, emprestimo) {                 // Funcionalidade ATU
 
 }
 
-function deletar(id, callback) {                            // Funcionalidade DELETAR (exportada indiretamente)
+async function deletar(id){ 
     if(!id || isNaN(id)){
         const erro = { 
-            mensagem: "Identificador Invalido!",
+            mensagem: "Emprestimo Invalido!",
             numero: 400
         }
-        callback(erro, undefined);
+        throw erro;
     }
-    else {
-        emprestimoPersistencia.deletar(id,callback);
-    }
-}
+    else { 
+        const testaId = await emprestimoPersistencia.validaId(id);
+        if (!testaId){
+            const retorno = await emprestimoPersistencia.deletar(id);
+            return retorno;
+        }else{
+            const erro = { 
+                mensagem: "Emprestimo não existe!",
+                numero: 400
+            };
+            throw erro;
 
-
-function verificaLivroDisponivel(id, callback) {                            // Funcionalidade DELETAR (exportada indiretamente)
-    if(!id || isNaN(id)){
-        const erro = { 
-            mensagem: "Livro Não Existe!",
-            numero: 501
         }
-        callback(erro, undefined);
-    }
-    else {
-        emprestimoPersistencia.verificaLivroDisponivel(id,callback);
     }
 }
+
+
+
+
 
 module.exports = {
-    inserir, listar,buscarPorId, atualizar, deletar,verificaLivroDisponivel      // Exporta funcionalidades para CONTROLLER
+    inserir, listar,buscarPorId, atualizar, deletar      // Exporta funcionalidades para CONTROLLER
 }

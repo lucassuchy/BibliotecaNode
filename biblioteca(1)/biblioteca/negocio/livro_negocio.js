@@ -1,73 +1,76 @@
 const livroPersistencia = require('../persistencia/livro_persistencia.js')   // Importa funcionalides de PERSISTÊNCIA
 
 
-function inserir (livro, callback) {                      // Funcionalidade INSERIR (exportada indiretamente)
+async function inserir (livro) {                      // Funcionalidade INSERIR (exportada indiretamente)
     if(!livro || !livro.nome || !livro.autor || !livro.ano || !livro.quantidade){
         const erro = { 
             mensagem: "Campo nome, autor, ano ou quantidade vazio(s)!",
             numero: 400
         };
-        callback(erro, undefined)
+        throw erro;
     }
     else {
-        livroPersistencia.inserir(livro, callback);
+        const livroInserido = await livroPersistencia.inserir(livro);
+        return livroInserido;
     }  
 }
 
 
-function listar (callback) {                                // Funcionalidade LISTAR (exportada indiretamente)
-    livroPersistencia.listar(callback);
+async function listar () {                                // Funcionalidade LISTAR (exportada indiretamente)
+    return await livroPersistencia.listar();
 }
 
 
-function buscarPorId(id, callback){                         // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
+async function buscarPorId(id){                         // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
     if(!id || isNaN(id)){
         const erro = { 
             mensagem: "Identificador Invalido!",
             numero: 400
         }
-        callback(erro, undefined);
+        throw erro;
     }
     else { 
-        livroPersistencia.buscarPorId(id, callback);
+        const retorno = await livroPersistencia.buscarPorId(id);
+        return retorno;
     }
 }
 
 
-function atualizar(id, livro, callback) {                 // Funcionalidade ATUALIZAR (exportada indiretamente)
+async function atualizar(id, livro) {                 // Funcionalidade ATUALIZAR (exportada indiretamente)
     if(!id || isNaN(id)){
         const erro = { 
             mensagem: "Identificador Invalido!",
             numero: 400
         }
-        callback(erro, undefined);
+        throw erro;
     }
     else if(!livro || !livro.nome || !livro.autor || !livro.ano || !livro.quantidade) {
         const erro = { 
             mensagem: "Os campos nome, autor, ano ou quantidade devem ser preenchido(s)",
             numero: 400
         };
-        callback(erro, undefined)
+        throw erro;
     }
     else { 
-        livroPersistencia.atualizar(id, livro, callback);
+        const livroAtualizado = await livroPersistencia.atualizar(id, livro);
+        return livroAtualizado;
     }
 
 }
 
-function deletar(id, callback) {                            // Funcionalidade DELETAR (exportada indiretamente)
+async function deletar(id) {                            // Funcionalidade DELETAR (exportada indiretamente)
     if(!id || isNaN(id)){
         const erro = { 
             mensagem: "Identificador Invalido!",
             numero: 400
         }
-        callback(erro, undefined);
+        throw erro;
     }
     else {
-        livroPersistencia.deletar(id,callback);
+        const livroDeletado = livroPersistencia.deletar(id);
+        return livroDeletado;
     }
 }
-
 
 module.exports = {
     inserir, listar, buscarPorId, atualizar, deletar        // Exporta funcionalidades para CONTROLLER
