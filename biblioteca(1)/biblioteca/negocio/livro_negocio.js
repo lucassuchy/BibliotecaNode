@@ -29,11 +29,21 @@ async function buscarPorId(id){                         // Funcionalidade BUSCAR
         }
         throw erro;
     }
-    else { 
-        const retorno = await livroPersistencia.buscarPorId(id);
-        return retorno;
+    else {
+        const testaId = await livroPersistencia.validaId(id);
+        if (testaId){ 
+            const retorno = await livroPersistencia.buscarPorId(id);
+            return retorno;
+        }else{
+            const erro = { 
+                mensagem: "Identificador Não encontrado!",
+                numero: 400
+            }
+            throw erro;
+        }
+
+        }
     }
-}
 
 
 async function atualizar(id, livro) {                 // Funcionalidade ATUALIZAR (exportada indiretamente)

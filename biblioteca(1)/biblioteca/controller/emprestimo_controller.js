@@ -3,8 +3,9 @@ const emprestimoNegocio = require('../negocio/emprestimo_negocio');             
 exports.inserir = async (req, res) => {
 	try {
 	const emprestimo = req.body;
-	const inseriEmprestimo = await emprestimoNegocio.inserir(emprestimo) 
-	res.json(inseriEmprestimo)
+    console.log(emprestimo);
+	const inseriEmprestimo = await emprestimoNegocio.inserir(emprestimo);
+	res.status(201).json(inseriEmprestimo);
 	} catch (err){
 		res.status(err.numero).json({erro: err.mensagem});
 	}

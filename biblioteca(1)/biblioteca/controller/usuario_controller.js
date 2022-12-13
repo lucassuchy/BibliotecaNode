@@ -4,7 +4,7 @@ const usuarioNegocio = require('../negocio/usuario_negocio');                 //
 exports.inserir = async (req, res) => {                                         // Funcionalidade INSERIR (exportada diretamente)
   try {
   const usuario = req.body;
-  usuarioNegocio.inserir(usuario);
+  const usuarioInserido = await usuarioNegocio.inserir(usuario);
   res.status(201).json(usuarioInserido);
   }catch(err){
     res.status(err.numero).json({erro: err.mensagem});
@@ -35,8 +35,8 @@ exports.atualizar = async (req, res) => {                                       
   const id = req.params.id;
   const usuario = req.body;
   try{
-    usuarioNegocio.atualizar(id, usuario)
-    res.json(usuarioAlterado);
+    const usuarioAtualizado = await usuarioNegocio.atualizar(id, usuario)
+    res.json(usuarioAtualizado);
 
   }catch(err){
     res.status(err.numero).json({erro: err.mensagem});
@@ -49,6 +49,8 @@ exports.deletar = async (req, res) => {                                         
   const id = req.params.id;
   try{
     const usuarioDeletado = await   usuarioNegocio.deletar(id)
+    res.json(usuarioDeletado);
+
 
   }catch(err){
     res.status(err.numero).json({erro: err.mensagem});

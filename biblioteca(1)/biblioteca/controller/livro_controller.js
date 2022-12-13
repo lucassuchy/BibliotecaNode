@@ -4,7 +4,8 @@ const livroNegocio = require('../negocio/livro_negocio');                 // Imp
 exports.inserir = async (req, res) => {                                         // Funcionalidade INSERIR (exportada diretamente)
   try {
     const livro = req.body;
-    livroNegocio.inserir(livro)
+    const livroInserido = await livroNegocio.inserir(livro);
+    res.status(201).json(livroInserido);
   }catch(err){
     res.status(err.numero).json({erro: err.mensagem});
   }
@@ -45,7 +46,7 @@ exports.deletar = async (req, res) => {                                         
   
   const id = req.params.id;
   try{
-    const deletado = livroNegocio.deletar(id)
+    const deletado = await livroNegocio.deletar(id)
     res.json(deletado);
 
   }catch(err){

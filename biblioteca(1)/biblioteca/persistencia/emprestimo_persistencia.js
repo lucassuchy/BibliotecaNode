@@ -24,8 +24,11 @@ async function inserir(emprestimo) {                                            
 	// data devolução: hoje + 1 uma semana, podemos adicionar uma variavel pra tratar isso
     const data = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
     const devolucao = new Date(Date.now() + (( 3600 * 1000 * 24) * 7)).toISOString().replace(/T/, ' ').replace(/\..+/, '')
-    const sql = "INSERT INTO biblioteca.emprestimos (data_emprestimo, data_devolucao, id_livro, id_cliente) VALUES($1,$2, $3, $4) RETURNING *"
-    const values = [data,devolucao,emprestimo.livro, emprestimo.usuario];
+    const sql = `INSERT INTO biblioteca.emprestimos
+                (id_livro, id_cliente, data_emprestimo, data_devolucao, data_retorno)
+                VALUES($1, $2, $3, $4, $5)
+                RETURNING *;`
+    const values = [emprestimo.livro, emprestimo.usuario,data,devolucao, null];
     const res = await cliente.query(sql, values)
     await cliente.end();
     return res.rows[0];

@@ -30,9 +30,21 @@ async function buscarPorId(id){                         // Funcionalidade BUSCAR
         throw erro;
     }
     else { 
-        return await usuarioPersistencia.buscarPorId(id);
+        const testaId = await usuarioPersistencia.validaId(id);
+        if (testaId){ 
+            const retorno = await usuarioPersistencia.buscarPorId(id);
+            return retorno;
+        }else{
+            const erro = { 
+                mensagem: "Identificador Não encontrado!",
+                numero: 400
+            }
+            throw erro;
+        }
+
+        }
     }
-}
+
 
 
 async function atualizar(id, usuario) {                 // Funcionalidade ATUALIZAR (exportada indiretamente)

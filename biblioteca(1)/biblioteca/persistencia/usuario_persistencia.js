@@ -42,7 +42,8 @@ async function listar() {                                                       
         return {
                 id: linha.id,                
                 nome: linha.nome,
-                telefone:   linha.email,
+                telefone:   linha.telefone,
+                email:linha.email,
                 cidade: linha.cidade,
                 estado: linha.estado
                 }
@@ -56,7 +57,6 @@ async function listar() {                                                       
 async function buscarPorId(id){                                                    // Funcionalidade BUSCAR_POR_ID (exportada indiretamente)
     const cliente = new Client(conexao);
     await cliente.connect();
-    
     const sql = "SELECT * FROM biblioteca.usuarios WHERE id=$1";
     const values = [id];
     const query = await cliente.query(sql, values);
@@ -91,6 +91,20 @@ async function qtdLivrosAlugados(id) {                                          
     return retorno;
     }
 
+async function validaId(id){ 
+        const cliente = new Client(conexao);
+        await cliente.connect();
+        const sql = "SELECT id FROM biblioteca.usuarios WHERE id=$1";
+        const values = [id];
+        const query = await cliente.query(sql, values);
+        await cliente.end();
+        if (query.rows[0] == 'undefined' ){
+            return false
+        }else{
+            return true
+        }
+    }
+
 async function deletar(id) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
     const cliente = new Client(conexao);
     cliente.connect();
@@ -106,6 +120,6 @@ async function deletar(id) {                                                    
 
 module.exports = {
     inserir, listar, buscarPorId, atualizar, deletar
-    ,qtdLivrosAlugados
+    ,qtdLivrosAlugados, validaId
                          // Exporta funcionalidades para NEGOCIO
 }

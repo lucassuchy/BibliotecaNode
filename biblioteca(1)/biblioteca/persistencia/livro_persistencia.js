@@ -98,17 +98,32 @@ async function deletar(id) {                                                    
 async function qtdLivrosAlugados(id) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
     const cliente = new Client(conexao);
     await cliente.connect();
-    const sql = `select coalesce((SELECT count(*) 
-                FROM biblioteca.emprestimos
-                where id_livro = $1
-                and data_retorno is null 
-                group by id_livro;,0) as count;`;
+    const sql = `select coalesce(
+        (SELECT count(*) 
+        FROM biblioteca.emprestimos
+        where id_livro = $1
+        and data_retorno is null 
+        group by id_livro)
+        ,0) as quantidade`;
     const values = [id];
     const query = await cliente.query(sql, values);
     await cliente.end();
-    console.log(query.rows)
     let retorno = query.rows[0];
     return retorno;
+    }
+
+async function validaId(id){ 
+        const cliente = new Client(conexao);
+        await cliente.connect();
+        const sql = "SELECT id FROM biblioteca.livros WHERE id=$1";
+        const values = [id];
+        const query = await cliente.query(sql, values);
+        await cliente.end();
+        if (query.rows[0] == 'undefined' ){
+            return false
+        }else{
+            return true
+        }
     }
 
 async function verificaLivroDisponivel(id) {                                                        // Funcionalidade DELETAR (exportada indiretamente)
@@ -131,5 +146,6 @@ module.exports = {
     , atualizar
     , deletar
     ,verificaLivroDisponivel
-    ,qtdLivrosAlugados                    // Exporta funcionalidades para NEGOCIO
+    ,qtdLivrosAlugados 
+    ,validaId                   // Exporta funcionalidades para NEGOCIO
 }
